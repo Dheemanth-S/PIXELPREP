@@ -7,10 +7,10 @@ import {
   useSessionById,
 } from "../hooks/useSessions";
 import { PROBLEMS } from "../data/problems";
-import { executeCode } from "../lib/piston";
+import { executeCode } from "../lib/piston.js";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { getDifficultyBadgeClass } from "../lib/utils";
+import { getDifficultyBadgeClass } from "../lib/utlis.js";
 import { Loader2Icon, LogOutIcon, PhoneOffIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
