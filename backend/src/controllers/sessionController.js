@@ -5,9 +5,9 @@ export async function createSession(req, res) {
   try {
     const { problem, difficulty } = req.body;
     const userId = req.user._id;
-    const clerkId = req.user._clerkId;
+    const clerkId = req.user.clerkId;
 
-    if (!problem || difficulty) {
+    if (!problem || !difficulty) {
       return res
         .status(400)
         .json({ message: "Problem and difficulty are required" });
@@ -31,7 +31,7 @@ export async function createSession(req, res) {
       },
     });
 
-    chatClient.channel("messaging", callId, {
+    const channel = chatClient.channel("messaging", callId, {
       name: `${problem} Session`,
       created_by_id: clerkId,
       members: [clerkId],
@@ -47,13 +47,10 @@ export async function createSession(req, res) {
 
 export async function getActiveSessions(_, res) {
   try {
-    const sessions = (
-      await Session.find({ status: "active" }).populate(
-        "host",
-        "name profileImage email clerkId"
-      )
-    )
-      .toSorted({ createdAt: -1 })
+    const sessions = await Session.find({ status: "active" })
+      .populate("host", "name profileImage email clerkId")
+      .populate("participant", "name profileImage email clerkId")
+      .sort({ createdAt: -1 })
       .limit(20);
 
     res.status(200).json({ sessions });
@@ -67,7 +64,7 @@ export async function getMyRecentSessions(req, res) {
   try {
     const userId = req.user._id;
 
-    await Session.find({
+    const sessions = await Session.find({
       status: "completed",
       $or: [{ host: userId }, { participant: userId }],
     })
@@ -93,7 +90,7 @@ export async function getSessionById(req, res) {
 
     res.status(200).json({ session });
   } catch (error) {
-    console.error("Error in getSessionsById controller", error.message);
+    console.error("Error in getSessionById controller", error.message);
     res.status(500).json({ msg: "Internal Server Error" });
   }
 }
@@ -109,7 +106,7 @@ export async function joinSession(req, res) {
     if (!session) return res.status(404).json({ msg: "Session not found" });
 
     if (session.status !== "active")
-      return res.status(400).json({ msg: "Cannot join a Completed Session" });
+      return res.status(400).json({ msg: "Cannot join a Non Active Session" });
 
     if (session.host.toString() === userId.toString())
       return res
