@@ -1,14 +1,16 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { sessionApi } from "../api/sessions";
 
 export const useCreateSession = () => {
   const result = useMutation({
+    mutationKey: ["createSession"],
     mutationFn: sessionApi.createSession,
     onSuccess: () => toast.success("Session created successfully!"),
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Failed to create Sesson"),
+      toast.error(error.response?.data?.message || "Failed to create room"),
   });
+
   return result;
 };
 
@@ -17,6 +19,7 @@ export const useActiveSessions = () => {
     queryKey: ["activeSessions"],
     queryFn: sessionApi.getActiveSessions,
   });
+
   return result;
 };
 
@@ -25,6 +28,7 @@ export const useMyRecentSessions = () => {
     queryKey: ["myRecentSessions"],
     queryFn: sessionApi.getMyRecentSessions,
   });
+
   return result;
 };
 
@@ -33,8 +37,9 @@ export const useSessionById = (id) => {
     queryKey: ["session", id],
     queryFn: () => sessionApi.getSessionById(id),
     enabled: !!id,
-    refetchInterval: 5000,
+    refetchInterval: 5000, // refetch every 5 seconds to detect session status changes
   });
+
   return result;
 };
 

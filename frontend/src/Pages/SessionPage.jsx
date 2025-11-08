@@ -1,21 +1,21 @@
 import { useUser } from "@clerk/clerk-react";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   useEndSession,
   useJoinSession,
   useSessionById,
 } from "../hooks/useSessions";
-import { PROBLEMS } from "../data/problems.js";
-import { executeCode } from "../lib/piston.js";
+import { PROBLEMS } from "../data/problems";
+import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { getDifficultyBadgeClass } from "../lib/utlis.js";
+import { getDifficultyBadgeClass } from "../lib/utils";
 import { Loader2Icon, LogOutIcon, PhoneOffIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
 
-import useStreamClient from "../hooks/useStreamClient.js";
+import useStreamClient from "../hooks/useStreamClient";
 import { StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
 import VideoCallUI from "../components/VideoCallUI";
 
@@ -31,6 +31,7 @@ function SessionPage() {
     isLoading: loadingSession,
     refetch,
   } = useSessionById(id);
+
   const joinSessionMutation = useJoinSession();
   const endSessionMutation = useEndSession();
 
@@ -38,30 +39,37 @@ function SessionPage() {
   const isHost = session?.host?.clerkId === user?.id;
   const isParticipant = session?.participant?.clerkId === user?.id;
 
+  const { call, channel, chatClient, isInitializingCall, streamClient } =
+    useStreamClient(session, loadingSession, isHost, isParticipant);
+
+  // find the problem data based on session problem title
   const problemData = session?.problem
     ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
     : null;
-
-  const { call, channel, chatClient, isInitializingCall, streamClient } =
-    useStreamClient(session, loadingSession, isHost, isParticipant);
 
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(
     problemData?.starterCode?.[selectedLanguage] || ""
   );
 
+  // auto-join session if user is not already a participant and not the host
   useEffect(() => {
     if (!session || !user || loadingSession) return;
     if (isHost || isParticipant) return;
 
     joinSessionMutation.mutate(id, { onSuccess: refetch });
+
+    // remove the joinSessionMutation, refetch from dependencies to avoid infinite loop
   }, [session, user, loadingSession, isHost, isParticipant, id]);
 
+  // redirect the "participant" when session ends
   useEffect(() => {
     if (!session || loadingSession) return;
+
     if (session.status === "completed") navigate("/dashboard");
   }, [session, loadingSession, navigate]);
 
+  // update code when problem loads or changes
   useEffect(() => {
     if (problemData?.starterCode?.[selectedLanguage]) {
       setCode(problemData.starterCode[selectedLanguage]);
@@ -89,9 +97,10 @@ function SessionPage() {
   const handleEndSession = () => {
     if (
       confirm(
-        "Are you sure you want to end the session? All participants will be notified."
+        "Are you sure you want to end this session? All participants will be notified."
       )
     ) {
+      // this will navigate the HOST to dashboard
       endSessionMutation.mutate(id, {
         onSuccess: () => navigate("/dashboard"),
       });
