@@ -31,29 +31,33 @@ export const useMyRecentSessions = () => {
 export const useSessionById = (id) => {
   const result = useQuery({
     queryKey: ["session", id],
-    queryFn: (id) => sessionApi.getSessionById(id),
+    queryFn: () => sessionApi.getSessionById(id),
     enabled: !!id,
     refetchInterval: 5000,
   });
   return result;
 };
 
-export const usejoinSession = (id) => {
+export const useJoinSession = () => {
   const result = useMutation({
-    mutationFn: (id) => sessionApi.joinSession(id),
-    onSuccess: () => toast.success("Session joined successfully!"),
+    mutationKey: ["joinSession"],
+    mutationFn: sessionApi.joinSession,
+    onSuccess: () => toast.success("Joined session successfully!"),
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Failed to join Session"),
+      toast.error(error.response?.data?.message || "Failed to join session"),
   });
+
   return result;
 };
 
-export const useendSession = (id) => {
+export const useEndSession = () => {
   const result = useMutation({
-    mutationFn: (id) => sessionApi.endSession(id),
+    mutationKey: ["endSession"],
+    mutationFn: sessionApi.endSession,
     onSuccess: () => toast.success("Session ended successfully!"),
     onError: (error) =>
-      toast.error(error.response?.data?.message || "Failed to end Session"),
+      toast.error(error.response?.data?.message || "Failed to end session"),
   });
+
   return result;
 };
