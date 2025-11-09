@@ -17,7 +17,7 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(
   cors({
-    origin: ENV.CLIENT_URL,
+    origin: [ENV.CLIENT_URL, "https://pixelprep.vercel.app"],
     credentials: true,
   })
 );
@@ -31,7 +31,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({ msg: "success from health" });
 });
 
-if (ENV.NODE_ENV === "production") {
+if (ENV.APP_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("/{*any}", (req, res) => {
