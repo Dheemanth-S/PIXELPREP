@@ -1,20 +1,29 @@
 {
   "version": 2,
-  "functions": {
-    "backend/src/server.js": {
-      "includeFiles": "frontend/dist/**"
-    }
-  },
   "builds": [
     {
       "src": "backend/src/server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "frontend/dist/**"
+      }
+    },
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "/backend/src/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/dist/$1"
     }
   ]
 }
