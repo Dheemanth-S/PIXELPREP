@@ -35,7 +35,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-if (!process.env.VERCEL && ENV.APP_ENV === "production") {
+if (ENV.APP_ENV === "production") {
+  // Serve the built frontend from /frontend/dist
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("*", (req, res) => {
