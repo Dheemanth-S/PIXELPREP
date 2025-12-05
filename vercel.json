@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "backend/src/server.js": {
+      "includeFiles": "frontend/dist/**"
+    }
+  },
   "builds": [
     {
       "src": "backend/src/server.js",
