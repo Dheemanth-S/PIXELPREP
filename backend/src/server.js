@@ -13,7 +13,7 @@ import sessionRoutes from "./routes/sessionRoute.js";
 
 const app = express();
 
-// ✅ Correct way to get dirname in ESM (important on Vercel)
+// Proper __dirname in ESM (might still be useful for other things)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -40,19 +40,11 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ✅ Serve frontend build in production (local + Vercel)
-if (ENV.APP_ENV === "production") {
-  // server.js is backend/src/server.js → go up 2 levels → frontend/dist
-  const distPath = path.join(__dirname, "../../frontend/dist");
+// ❌ REMOVE all the frontend-serving logic from here.
+// We are not doing `app.use(express.static(...))`
+// and not doing `app.get(/.*/, ...)` in this file anymore.
 
-  app.use(express.static(distPath));
-
-  // use regex wildcard; "*" was causing issues on Vercel
-  app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
-  });
-}
-
+// Local dev: full server with listen()
 const startServer = async () => {
   try {
     await connectDB();
@@ -64,11 +56,9 @@ const startServer = async () => {
   }
 };
 
-// ✅ Local dev: run full server (listen)
 if (!process.env.VERCEL) {
   startServer();
 } else {
-  // ✅ Vercel serverless: connect DB, but do NOT listen
   connectDB().catch((error) => {
     console.error("Error connecting to DB on Vercel", error);
   });
