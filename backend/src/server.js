@@ -56,6 +56,10 @@ const startServer = async () => {
 
 if (!process.env.VERCEL) {
   startServer();
+} else {
+  connectDB().catch((error) => {
+    console.error("Error connecting to DB on Vercel", error);
+  });
 }
 
 export default app;
