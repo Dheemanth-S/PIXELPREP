@@ -27,10 +27,10 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/chat", chatRoutes);
 app.use("/api/sessions", sessionRoutes);
 
-if (ENV.APP_ENV === "production") {
+if (!process.env.VERCEL && ENV.APP_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("/{*any}", (req, res) => {
+  app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
@@ -42,9 +42,12 @@ const startServer = async () => {
       console.log("Server is running on Port:", ENV.PORT)
     );
   } catch (error) {
-    console.error("Error starting server");
+    console.error("Error starting server", error);
   }
 };
 
+if (!process.env.VERCEL) {
+  startServer();
+}
+
 export default app;
-startServer();
