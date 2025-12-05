@@ -40,11 +40,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ❌ REMOVE all the frontend-serving logic from here.
-// We are not doing `app.use(express.static(...))`
-// and not doing `app.get(/.*/, ...)` in this file anymore.
-
-// Local dev: full server with listen()
 const startServer = async () => {
   try {
     await connectDB();
