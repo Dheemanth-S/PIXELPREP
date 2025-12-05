@@ -27,6 +27,14 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/chat", chatRoutes);
 app.use("/api/sessions", sessionRoutes);
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    env: process.env.VERCEL ? "vercel" : "local",
+    url: req.url,
+  });
+});
+
 if (!process.env.VERCEL && ENV.APP_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
